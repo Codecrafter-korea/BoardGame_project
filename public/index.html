@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>EDEN DICE</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.google.com/specimen/EB+Garamond?preview.text=EDEN%20DICE" rel="stylesheet">
+    <style>
+        /* CSS 스타일 */
+        body{
+            font-family: 'EBgaramond', serif;
+            text-align: center;
+            background-color: #f0f0f0;
+        }
+        #login-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-image: url('background.jpg'); /* 배경 이미지 경로 */
+            background-size: contain; /* 화면을 채우도록 이미지 크기 조정 */
+            background-position: center; /* 이미지 위치를 중앙으로 */
+            background-repeat: no-repeat; /* 배경 이미지 반복 방지 */
+        }
+        
+        #game-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-image: url('game-background.jpg'); /* 배경 이미지 경로 */
+            background-size: contain; /* 화면을 채우도록 이미지 크기 조정 */
+            background-position: center; /* 이미지 위치를 중앙으로 */
+            background-repeat: no-repeat; /* 배경 이미지 반복 방지 */
+            position: relative;
+        }
+
+        /* 게임 화면 내 텍스트 색상 조정 */
+        
+
+        #game-start {
+            position: relative;
+            top: 150px; /* 현재 위치에서 50px 아래로 이동 */
+            left: 13px;
+            width: 150px; /* 이미지 너비 */
+            height: auto; /* 비율 유지 */
+            cursor: pointer; /* 클릭 가능한 커서 */
+            transition: transform 0.2s; /* 클릭 시 애니메이션 효과 */
+}
+
+        #game-start:hover {
+            transform: scale(1.1); /* 마우스 올릴 때 확대 효과 */
+        }
+
+
+        #game-start:hover {
+            background: none;
+        }
+
+
+        #player-status {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+
+        #controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative; /* 버튼 위치를 겹치기 위한 설정 */
+        }
+
+        #roll-dice, #restart-game {
+            position: absolute; /* 버튼을 같은 위치에 겹치게 배치 */
+            top: 0;
+            left: 0;
+            width: 150px;
+            height: auto;
+            transition: transform 0.2s;
+            cursor: pointer;
+        }
+
+        #roll-dice {
+            display: block; /* 기본 표시 */
+        }
+
+        #restart-game {
+            display: none; /* 기본 숨김 */
+        }
+        #roll-dice:hover, #restart-game:hover {
+            transform: scale(1.1); /* 마우스를 올렸을 때 확대 효과 */
+        }
+
+        #message {
+            margin-top: 20px;
+            font-size: 16px;
+            font-weight: bold;
+            margin: 0 auto;
+            width: 40%;
+            text-align: left;
+            background-color: #a0b87a;  
+            padding: 10px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+            position: absolute;
+            bottom: 150px;
+            left: 100px;
+        }
+
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+
+        /* 모달 스타일 */
+        #quiz-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+        }
+
+        #quiz-content {
+            background: #fff;
+            padding: 20px;
+            margin: 100px auto;
+            width: 80%;
+            max-width: 500px;
+            text-align: left;
+        }
+
+        #quiz-question {
+            margin-bottom: 10px;
+        }
+
+        #quiz-answer {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        /* 보스 이미지 스타일 */
+        #boss-image-container {
+            position: absolute;
+            top: 200px;
+            right: 100px;
+        }
+
+        #boss-image {
+            max-width: 500px;
+            height: 500px;
+            display: none;
+        }
+
+        /* 무기 이미지 스타일 추가 */
+        #weapon-image-container {
+            margin-top: 20px;   
+            text-align: center;
+        }
+
+        #weapon-image {
+        position: absolute;
+        bottom: 100px;  
+        right: 150px;   
+        width: 150px;  /* 너비 100px */
+        height: auto;  
+        }
+    
+
+
+
+    </style>
+</head>
+<body>
+    <!-- 로그인 화면 -->
+    <div id="login-screen" style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; background-color: #1e1e2f; color: white;">
+        <h1></h1>
+        <!-- 이미지 버튼 추가 -->
+        <img id="game-start" src="button-image1.png" alt="Game Start" style="cursor: pointer; width: 150px; height: auto;">
+    </div>       
+    <div id="game-screen" style="display: none;">
+        <h1></h1>
+    <div id="player-status">
+        <!-- 플레이어들의 위치와 포인트를 표시 -->
+    </div>
+    <div id="controls">
+        <!-- 이미지를 사용한 주사위 굴리기 버튼 -->
+        <img id="roll-dice" src="dice-button.png" alt="주사위 굴리기 버튼" style="cursor: pointer;">
+        <!-- 게임 재시작 버튼 -->
+        <img id="restart-game" src="restart-button.png" alt="Restart Game" style="display: none; cursor: pointer;">
+    </div>    
+    
+    <div id="message">
+        <!-- 게임 진행 메시지 표시 -->
+    </div>
+
+    <!-- 보스 이미지 컨테이너 추가 -->
+    <div id="boss-image-container">
+        <img id="boss-image" src="" alt="보스 이미지">
+    </div>
+
+    <!-- 무기 이미지 컨테이너 추가 -->
+    <div id="weapon-image-container">
+        <img id="weapon-image" src="" alt="무기 이미지">
+    </div>
+
+    <!-- 퀴즈 모달 -->
+    <div id="quiz-modal">
+        <div id="quiz-content">
+            <p id="quiz-question"></p>
+            <input type="text" id="quiz-answer" placeholder="답변을 입력하세요">
+            <button id="submit-answer">제출</button>
+        </div>
+    </div>
+
+    <script>
+        const loginScreen = document.getElementById('login-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const gameStartButton = document.getElementById('game-start');
+
+        gameStartButton.addEventListener('click', function () {
+        loginScreen.style.display = 'none';
+        gameScreen.style.display = 'block';
+        });
+        // JavaScript 코드
+        let players = [
+            { position: 1, points: 0, name: "플레이어 1", color: "#1E90FF" }, // 파란색
+            { position: 1, points: 0, name: "플레이어 2", color: "#FF6347" }  // 빨간색
+        ];
+
+        // 이벤트 종류
+        const events = [
+            { type: 'bonus', points: 1, message: "1포인트를 획득했습니다!" },
+            { type: 'penalty', points: -1, message: "1포인트를 잃었습니다!" },
+            { type: 'moveStart', message: "1번 칸으로 이동합니다!" },
+            { type: 'moveBoss', message: "랜덤 보스 칸으로 이동합니다!" },
+            { type: 'doubleDice', message: "다음 주사위 굴리기가 2배로 적용됩니다!" },
+            { type: 'skipTurn', message: "한 턴 쉬어갑니다!" }
+        ];
+
+        // 보스 칸 목록
+        const bossSquares = [11, 18, 30];
+
+
+        let currentPlayerIndex = 0;
+        let isBossBattle = false;
+        let bossBattleState = null; // 보스전 상태를 관리하기 위한 변수
+
+        // 보스 정보 객체 추가
+        const bosses = {
+            11: {
+                name: "보스 1",
+                image: "boss1.jpg" // 보스 1 이미지 파일 경로
+            },
+            18: {
+                name: "보스 2",
+                image: "boss2.jpg" // 보스 2 이미지 파일 경로
+            },
+            30: {
+                name: "보스 3",
+                image: "boss3.jpg" // 보스 3 이미지 파일 경로
+            }
+        };
+
+        // 무기 정보 객체 추가
+        const weapons = [
+            {
+                name: "검잇기의 대검",
+                image: "weapon1.jpg",
+                effect: function(damage, playerRoll) {
+                    if (playerRoll === 4) {
+                        return damage * 2;
+                    }
+                    return damage;
+                }
+            },
+            {
+                name: "신이 남긴 검",
+                image: "weapon2.jpg",
+                effect: function(damage, playerRoll) {
+                    if (playerRoll % 2 === 0) {
+                        return damage + 1;
+                    }
+                    return damage;
+                }
+            },
+            {
+                name: "죽음을 바로잡는 성률",
+                image: "weapon3.jpg",
+                effect: function(damage, playerRoll) {
+                    if (playerRoll % 2 === 1) {
+                        return damage + 2;
+                    }
+                    return damage;
+                }
+            }
+        ];
+
+        document.getElementById('roll-dice').addEventListener('click', function() {
+            if (isBossBattle) {
+        // 보스전 진행 중일 때의 주사위 굴리기 로직 호출
+        if (bossBattleState && bossBattleState.type === 'battle1') {
+            bossBattle1RollDice();
+        } else if (bossBattleState && bossBattleState.type === 'battle2') {
+            bossBattle2RollDice();
+        } else if (bossBattleState && bossBattleState.type === 'battle3') {
+            bossBattle3RollDice();
+        }
+    } else {
+        // 일반 게임 진행 중일 때의 주사위 굴리기 로직 호출
+        normalRollDice();
+    }
+});
+
+        function checkEventSquare(player) {
+            const eventSquares = [9, 16, 28]; // 이벤트 칸 정의
+            if (eventSquares.includes(player.position)) {
+                handleRandomEvent(player);
+            }
+        }
+
+
+        function normalRollDice() {
+    let currentPlayer = players[currentPlayerIndex];
+    let initialPosition = currentPlayer.position; // 이동 전 위치
+    let diceRoll = Math.floor(Math.random() * 6) + 1;
+
+    // 주사위 2배 효과 확인
+    if (currentPlayer.doubleDice) {
+        diceRoll *= 2;
+        currentPlayer.doubleDice = false; // 효과 초기화
+        displayMessage(`${currentPlayer.name}이(가) 주사위 2배 효과로 ${diceRoll}을 굴렸습니다. 현재 위치: ${currentPlayer.position + diceRoll}`);
+    } else {
+        displayMessage(`${currentPlayer.name}이(가) 주사위를 굴려 ${diceRoll}이 나왔습니다. 현재 위치: ${currentPlayer.position + diceRoll}`);
+    }
+
+    currentPlayer.position += diceRoll;
+
+    // 위치가 32를 넘어가면 1로 돌아감
+    if (currentPlayer.position > 32) {
+        currentPlayer.position = currentPlayer.position % 32 || 1;
+        currentPlayer.points += 3;
+        displayMessage(`${currentPlayer.name}이(가) 한 바퀴를 돌아 3포인트를 획득했습니다! 현재 포인트: ${currentPlayer.points}`);
+    }
+
+    // 백엔드서버로 플레이어 데이터 전송
+    sendPlayerDataToServer(currentPlayerIndex, currentPlayer.position);
+
+    // 뱀과 사다리 처리
+    handleSpecialSquares(currentPlayer);
+
+    // 두 번째 위치(변경 후) 서버로 전송
+    sendPlayerDataToServer(currentPlayerIndex, currentPlayer.position);
+
+    // 이벤트 칸 체크
+    checkEventSquare(currentPlayer);
+
+    // 보스전 체크
+    if (currentPlayer.position === 11 || currentPlayer.position === 18 || currentPlayer.position === 30) {
+        isBossBattle = true;
+        startBossBattle(currentPlayer);
+    } else {
+        // 포인트가 10 이상이면 승리
+        if (currentPlayer.points >= 10) {
+            displayMessage(`${currentPlayer.name}이(가) 승리했습니다!`);
+            document.getElementById('roll-dice').style.pointerEvents = 'none';
+            document.getElementById('restart-game').style.display = 'inline-block';
+            return;
+        }
+
+        // 턴 스킵 여부 확인
+        if (currentPlayer.skipTurns && currentPlayer.skipTurns > 0) {
+            currentPlayer.skipTurns--;
+            displayMessage(`${currentPlayer.name}이(가) ${currentPlayer.skipTurns+1}턴 동안 이동할 수 없습니다.`);
+        } else {
+            // 다음 플레이어로 턴 이동
+            currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+        }
+    }
+}
+
+
+
+        function handleSpecialSquares(player) {
+            const specialSquares = {
+                15: 11,
+                26: 12,
+                17: 1,
+                29: 20,
+                21: 18,
+                22: 30,
+                4: 19
+            };
+            if (specialSquares[player.position]) {
+                let initialPosition = player.position;
+                player.position = specialSquares[player.position];
+
+                // 첫 번째 위치 전송
+                sendPlayerDataToServer(currentPlayerIndex, initialPosition);
+
+                // 두 번째 위치 전송
+                sendPlayerDataToServer(currentPlayerIndex, player.position);
+
+                displayMessage(`${player.name}이(가) ${initialPosition}번 칸에서 ${player.position}번 칸으로 이동했습니다.`);
+            }
+        }
+
+        
+        // 이벤트 처리 함수
+        function handleRandomEvent(player) {
+    const initialPosition = player.position; // 이벤트 발생 전 위치
+    const randomEvent = events[Math.floor(Math.random() * events.length)];
+    displayMessage(`${player.name}이(가) 이벤트 칸에 도달했습니다! ${randomEvent.message}`);
+
+    // **이벤트 발생 전 위치 서버로 전송**
+    sendPlayerDataToServer(currentPlayerIndex, initialPosition);
+
+    // 이벤트 처리
+    switch (randomEvent.type) {
+        case 'bonus':
+            player.points += randomEvent.points;
+            break;
+        case 'penalty':
+            player.points += randomEvent.points;
+            break;
+        case 'moveStart':
+            player.position = 1; // 시작 칸으로 이동
+            break;
+        case 'moveBoss':
+            player.position = bossSquares[Math.floor(Math.random() * bossSquares.length)]; // 보스 칸으로 이동
+            break;
+        case 'doubleDice':
+            player.doubleDice = true; // 주사위 2배 효과
+            break;
+        case 'skipTurn':
+            player.skipTurns = 1; // 턴 스킵 효과
+            break;
+    }
+
+    const finalPosition = player.position; // 이벤트 처리 후 위치
+
+    // **이벤트 발생 후 위치 서버로 전송**
+    sendPlayerDataToServer(currentPlayerIndex, finalPosition);
+
+    updatePlayerStatus();
+}
+
+        function startBossBattle(player) {
+            displayMessage(`보스가 등장했습니다! ${player.name}의 보스전이 시작됩니다.`);
+
+            // 보스 이미지 표시
+            const boss = bosses[player.position];
+            if (boss) {
+                const bossImage = document.getElementById('boss-image');
+                bossImage.src = boss.image;
+                bossImage.style.display = 'block';
+            }
+
+            if (player.position === 11) {
+                bossBattle1(player);
+            } else if (player.position === 18) {
+                bossBattle2(player);
+            } else if (player.position === 30) {
+                bossBattle3(player);
+            }
+        }
+
+        // 보스전 1 함수
+        function bossBattle1(player) {
+            bossBattleState = {
+                player: player,
+                wins: 0,
+                losses: 0,
+                rounds: 0,
+                type: 'battle1'
+            };
+            displayMessage("보스전이 시작됩니다! 총 3판 중 2판을 먼저 이기면 승리합니다.");
+            displayMessage("첫 번째 게임: 주사위를 굴려 3 이상의 숫자가 나오면 승리합니다.");
+        }
+
+        function bossBattle1RollDice() {
+            let state = bossBattleState;
+            let player = state.player;
+            state.rounds++;
+
+            if (state.rounds === 1 || state.rounds === 2 || state.rounds === 3) {
+                if (state.rounds === 1) {
+                    // 첫 번째 게임 로직
+                    let roll = Math.floor(Math.random() * 6) + 1;
+                    displayMessage(`${player.name}이(가) 주사위를 굴려 ${roll}이 나왔습니다.`);
+                    if (roll >= 3) {
+                        state.wins++;
+                        displayMessage(`축하합니다! ${roll}이 나와 승리했습니다.`);
+                    } else {
+                        state.losses++;
+                        displayMessage(`아쉽습니다. ${roll}이 나와 패배했습니다.`);
+                    }
+                    checkBossBattle1Result();
+                    if (state.wins < 2 && state.losses < 2) {
+                        displayMessage("두 번째 게임: 주사위를 굴려 홀수나 짝수를 맞추세요.");
+                    }
+                } else if (state.rounds === 2) {
+                    // 두 번째 게임 로직
+                    let oddOrEven = Math.random() < 0.5 ? '홀수' : '짝수';
+                    state.oddOrEven = oddOrEven;
+                    displayMessage(`보스가 ${oddOrEven}를 선택했습니다. 주사위를 굴려 맞춰보세요.`);
+                } else if (state.rounds === 3) {
+                    let roll = Math.floor(Math.random() * 6) + 1;
+                    let result = roll % 2 === 0 ? '짝수' : '홀수';
+                    displayMessage(`${player.name}이(가) 주사위를 굴려 ${roll}이 나왔습니다 (${result}).`);
+                    if (result === state.oddOrEven) {
+                        state.wins++;
+                        displayMessage(`축하합니다! ${result}를 맞췄습니다.`);
+                    } else {
+                        state.losses++;
+                        displayMessage(`아쉽습니다. ${result}를 맞추지 못했습니다.`);
+                    }
+                    checkBossBattle1Result();
+                    if (state.wins < 2 && state.losses < 2) {
+                        displayMessage("세 번째 게임: 보스와 주사위 대결을 합니다. 주사위를 굴려주세요.");
+                    }
+                }
+            } else if (state.rounds === 4) {
+                // 세 번째 게임 로직
+                let playerRoll = Math.floor(Math.random() * 6) + 1;
+                let bossRoll = Math.floor(Math.random() * 6) + 1;
+                displayMessage(`${player.name}이(가) 주사위를 굴려 ${playerRoll}이 나왔습니다.`);
+                displayMessage(`보스가 주사위를 굴려 ${bossRoll}이 나왔습니다.`);
+                if (playerRoll > bossRoll) {
+                    state.wins++;
+                    displayMessage(`축하합니다! 당신의 ${playerRoll}이 보스의 ${bossRoll}보다 높습니다.`);
+                } else if (playerRoll < bossRoll) {
+                    state.losses++;
+                    displayMessage(`아쉽습니다. 보스의 ${bossRoll}이 당신의 ${playerRoll}보다 높습니다.`);
+                } else {
+                    displayMessage(`무승부입니다!`);
+                }
+                checkBossBattle1Result();
+            }
+        }
+
+        function checkBossBattle1Result() {
+            let state = bossBattleState;
+            if (state.wins === 2) {
+                endBossBattle(state.player, true);
+            } else if (state.losses === 2) {
+                endBossBattle(state.player, false);
+            } else if (state.rounds >= 4) {
+                if (state.wins > state.losses) {
+                    endBossBattle(state.player, true);
+                } else {
+                    endBossBattle(state.player, false);
+                }
+            }
+        }
+
+        // 보스전 2 함수
+        function bossBattle2(player) {
+    bossBattleState = {
+        player: player,
+        type: 'battle2'
+    };
+    displayMessage("보스전이 시작됩니다! 주사위를 굴려 퀴즈 난이도를 결정하세요.");
+
+    // 주사위 굴리기 버튼 이미지 변경 (선택 사항)
+    const rollDiceButton = document.getElementById('roll-dice');
+    rollDiceButton.src = 'dice-button.png'; // 보스전 주사위 버튼 이미지로 변경
+}
+
+
+        function bossBattle2RollDice() {
+    let state = bossBattleState;
+    let player = state.player;
+
+    let difficulty = Math.floor(Math.random() * 6) + 1; // 난이도 1부터 6까지
+    displayMessage(`${player.name}이(가) 주사위를 굴려 난이도 ${difficulty}의 문제를 받았습니다.`);
+    let question = getQuestion(difficulty);
+    displayMessage(`상식 퀴즈입니다! 난이도 ${difficulty}의 문제를 맞춰보세요.`);
+
+    // **주사위 굴리기 버튼 비활성화**
+    document.getElementById('roll-dice').style.pointerEvents = 'none'
+
+    // 퀴즈 모달 표시
+    document.getElementById('quiz-modal').style.display = 'block';
+    document.getElementById('quiz-question').innerText = `${question.question}\n\n${question.options.join('\n')}`;
+
+    document.getElementById('submit-answer').onclick = function() {
+    let answer = document.getElementById('quiz-answer').value.trim().toLowerCase();
+    document.getElementById('quiz-answer').value = '';
+    document.getElementById('quiz-modal').style.display = 'none';
+
+    // **주사위 굴리기 버튼 활성화**
+    const rollDiceButton = document.getElementById('roll-dice');
+    rollDiceButton.style.pointerEvents = 'auto'; // 클릭 가능하게 설정
+    rollDiceButton.disabled = false; // 비활성화 해제
+
+    let won = false;
+    if (answer && answer === question.answer) {
+        won = true;
+        displayMessage(`정답입니다!`);
+    } else {
+        displayMessage(`오답입니다. 정답은 ${question.answer.toUpperCase()}입니다.`);
+    }
+    endBossBattle(player, won);
+};
+}
+
+
+        // 보스전 3 함수
+        function bossBattle3(player) {
+    bossBattleState = {
+        player: player,
+        type: 'battle3',
+        playerHP: 15,
+        bossHP: 15,
+        weapon: weapons[Math.floor(Math.random() * weapons.length)] // 무기 랜덤 선택
+    };
+
+    displayMessage(`보스전이 시작됩니다! ${player.name}과 보스는 각각 15의 HP로 시작합니다.`);
+    displayMessage(`${player.name}이(가) 무기 "${bossBattleState.weapon.name}"를 획득했습니다!`);
+
+    // 무기 이미지 표시
+    const weaponImage = document.getElementById('weapon-image');
+    weaponImage.src = bossBattleState.weapon.image;
+    weaponImage.style.display = 'block';
+}
+
+function bossBattle3RollDice() {
+    let state = bossBattleState;
+    let player = state.player;
+
+    // 플레이어와 보스가 주사위를 굴립니다
+    let playerRoll = Math.floor(Math.random() * 6) + 1;
+    let bossRoll = Math.floor(Math.random() * 6) + 1;
+
+    displayMessage(`${player.name}이(가) 주사위를 굴려 ${playerRoll}이 나왔습니다.`);
+    displayMessage(`보스가 주사위를 굴려 ${bossRoll}이 나왔습니다.`);
+
+    if (playerRoll > bossRoll) {
+        let damage = playerRoll - bossRoll;
+        // 무기 효과 적용
+        damage = state.weapon.effect(damage, playerRoll);
+        state.bossHP -= damage;
+        displayMessage(`${player.name}이(가) 보스에게 ${damage}의 피해를 입혔습니다! (보스 HP: ${state.bossHP}/15)`);
+    } else if (playerRoll < bossRoll) {
+        let damage = bossRoll - playerRoll;
+        state.playerHP -= damage;
+        displayMessage(`보스가 ${player.name}에게 ${damage}의 피해를 입혔습니다! (${player.name} HP: ${state.playerHP}/15)`);
+    } else {
+        displayMessage("무승부입니다! 서로 피해를 입지 않았습니다.");
+    }
+
+    // 전투 종료 체크
+    if (state.playerHP <= 0) {
+        displayMessage(`${player.name}이(가) 패배하였습니다.`);
+        endBossBattle(player, false);
+    } else if (state.bossHP <= 0) {
+        displayMessage(`${player.name}이(가) 승리하였습니다!`);
+        endBossBattle(player, true);
+    } else {
+        // 턴이 계속될 경우 메시지 표시
+        displayMessage("다음 턴을 진행합니다. 주사위를 다시 굴려주세요.");
+    }
+}
+
+function endBossBattle(player, won) {
+    if (won) {
+        player.points += 2;
+        displayMessage(`${player.name}이(가) 보스전을 클리어하여 2포인트를 획득했습니다! 현재 포인트: ${player.points}`);
+    } else {
+        displayMessage(`${player.name}이(가) 보스전에 실패했습니다.`);
+    }
+
+    isBossBattle = false;
+    bossBattleState = null;
+
+    // 보스 이미지 숨기기
+    const bossImage = document.getElementById('boss-image');
+    bossImage.style.display = 'none';
+
+    // 무기 이미지 숨기기
+    const weaponImage = document.getElementById('weapon-image');
+    weaponImage.style.display = 'none';
+
+    updatePlayerStatus();
+
+    // 포인트가 10 이상이면 승리
+    if (player.points >= 10) {
+        displayMessage(`${player.name}이(가) 승리했습니다!`);
+        document.getElementById('roll-dice').style.pointerEvents = 'none';
+        document.getElementById('restart-game').style.display = 'inline-block';
+        return;
+    }
+
+    // 다음 플레이어로 턴 이동
+    currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+}
+
+
+
+        function getQuestion(difficulty) {
+            const questions = {
+                1: [
+                    {
+                        question: "달에는 대기가 거의 없어서 하늘은 무슨 색으로 보일까요?",
+                        options: ["a) 파란색", "b) 검은색", "c) 회색", "d) 붉은색"],
+                        answer: "b"
+                    },
+                    {
+                        question: "빅뱅 이론에 따르면 우주는 어떻게 시작되었나요?",
+                        options: ["a) 작은 폭발", "b) 큰 폭발", "c) 점진적인 성장", "d) 감축"],
+                        answer: "b"
+                    }
+                ],
+                2: [
+                    {
+                        question: "전 세계에서 가장 높은 산은 어디일까요?",
+                        options: ["a) 킬리만자로 산", "b) 에베레스트 산", "c) 로키 산맥", "d) 안데스 산맥"],
+                        answer: "b"
+                    },
+                    {
+                        question: "혈액 속 산소를 운반하는 물질은 무엇일까요?",
+                        options: ["a) 칼슘", "b) 적혈구", "c) 혈장", "d) 혈소판"],
+                        answer: "b"
+                    }
+                ],
+                3: [
+                    {
+                        question: "세계에서 가장 긴 강은 무엇일까요?",
+                        options: ["a) 나일강", "b) 아마존강", "c) 황허강", "d) 미시시피강"],
+                        answer: "a"
+                    },
+                    {
+                        question: "자전거가 넘어지지 않고 달릴 수 있는 이유는 어떤 힘 때문일까요?",
+                        options: ["a) 자이로스코프 효과", "b) 중력", "c) 마찰력", "d) 자기력"],
+                        answer: "a"
+                    }
+                ],
+                4: [
+                    {
+                        question: "전 세계적으로 사용되는 국제 단위계(SI)의 온도 단위는 무엇일까요?",
+                        options: ["a) 섭씨", "b) 화씨", "c) 캘빈", "d) 도씨"],
+                        answer: "c"
+                    },
+                    {
+                        question: "인체에서 가장 작은 뼈는 어디에 있을까요?",
+                        options: ["a) 발목", "b) 손가락", "c) 귀", "d) 손목"],
+                        answer: "c"
+                    }
+                ],
+                5: [
+                    {
+                        question: "플랑크 상수는 무엇을 설명하기 위해 필요한 상수일까요?",
+                        options: ["a) 상대성이론", "b) 양자역학", "c) 뉴턴의 운동법칙", "d) 열역학"],
+                        answer: "b"
+                    },
+                    {
+                        question: "유전 물질을 DNA에서 RNA로 복사하는 과정을 무엇이라 할까요?",
+                        options: ["a) 전사", "b) 번역", "c) 증폭", "d) 재조합"],
+                        answer: "a"
+                    }
+                ],
+                6: [
+                    {
+                        question: "하이젠베르크의 불확정성 원리는 어떤 개념에 관한 것일까요?",
+                        options: ["a) 입자의 위치와 속도", "b) 에너지와 빛", "c) 전자와 양자", "d) 속력과 가속도"],
+                        answer: "a"
+                    },
+                    {
+                        question: "세계에서 가장 작은 국가인 바티칸 시티의 면적은 대략 얼마나 될까요?",
+                        options: ["a) 0.2 km²", "b) 0.5 km²", "c) 1 km²", "d) 2 km²"],
+                        answer: "b"
+                    }
+                ]
+            };
+            let selectedQuestions = questions[difficulty];
+            return selectedQuestions[Math.floor(Math.random() * selectedQuestions.length)];
+        }
+
+        function displayMessage(message) {
+    const messageDiv = document.getElementById('message');
+
+    // 플레이어 이름과 색상을 추출하기 위한 변수 선언
+    let playerColor = null;
+
+    // 플레이어 이름에 색상 적용 및 배경색 설정을 위해 반복문 사용
+    players.forEach(player => {
+        if (message.includes(player.name)) {
+            // 플레이어 이름에 색상 적용
+            const nameWithColor = `<span style="color: ${player.color}; font-weight: bold;">${player.name}</span>`;
+            message = message.replace(new RegExp(player.name, 'g'), nameWithColor);
+
+            // 해당 플레이어의 색상을 저장
+            playerColor = player.color;
+        }
+    });
+
+    // 메시지를 담을 div 생성
+    const messageItem = document.createElement('div');
+
+    // 배경색 설정 (플레이어의 색상을 더 밝게 조정)
+    if (playerColor) {
+        const backgroundColor = lightenColor(playerColor, 50); 
+        messageItem.style.backgroundColor = backgroundColor;
+    }
+
+    // 메시지 내용 설정
+    messageItem.innerHTML = `<p>${message}</p>`;
+
+    // 메시지를 메시지 창에 추가
+    messageDiv.appendChild(messageItem);
+
+    // 메시지를 메시지 창에 추가
+    messageDiv.appendChild(messageItem);
+
+    // 메시지 개수가 7개를 초과하면 가장 오래된 메시지 삭제
+    if (messageDiv.children.length > 7) {
+        messageDiv.removeChild(messageDiv.firstChild);
+    }
+    // 스크롤 자동 이동(필요없음)
+}
+
+// 색상 밝기 조정 함수 추가
+function lightenColor(hex, percent) {
+    // HEX 색상을 RGB로 변환
+    var num = parseInt(hex.slice(1),16),
+        amt = Math.round(2.55 * percent),
+        R = (num >> 16) + amt,
+        G = (num >> 8 & 0x00FF) + amt,
+        B = (num & 0x0000FF) + amt;
+
+    // RGB 값을 0~255 범위로 제한
+    return '#' + (
+      0x1000000 +
+      (R<255?R<0?0:R:255)*0x10000 +
+      (G<255?G<0?0:G:255)*0x100 +
+      (B<255?B<0?0:B:255)
+    ).toString(16).slice(1);
+}
+
+
+
+        function updatePlayerStatus() {
+            let statusDiv = document.getElementById('player-status');
+            statusDiv.innerHTML = '';
+            players.forEach(player => {
+                let playerInfo = document.createElement('div');
+                playerInfo.innerHTML = `<span style="color: ${player.color}; font-weight: bold;">${player.name}</span>: 포인트 ${player.points}`;
+                statusDiv.appendChild(playerInfo);
+            });
+
+            
+        }
+        // 플레이어 데이터 서버로 전송
+        function sendPlayerDataToServer(playerIndex, position) {
+            // JSON 데이터 생성
+            const data = {
+                playerIndex: playerIndex,
+                position: position,
+            };
+
+    // 백엔드서버 URL
+    const serverUrl = "http://192.168.1.177:5501/update-player";
+
+    // HTTP POST 요청으로 데이터 전송
+            fetch("http://localhost:5501/update-player", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+        })
+        .then((response) => {
+            if (response.ok) {
+                console.log("플레이어 데이터 서버로 전송 성공:", data);
+            } else {
+                console.error("서버 응답 실패:", response.statusText);
+            }
+        })
+        .catch((err) => {
+            console.error("데이터 전송 중 오류 발생:", err);
+        });
+}
+document.getElementById('restart-game').addEventListener('click', function () {
+    // 모든 플레이어 초기화
+    players.forEach(player => {
+        player.position = 1;
+        player.points = 0;
+    });
+    currentPlayerIndex = 0;
+    isBossBattle = false;
+    bossBattleState = null;
+
+    // 메시지 초기화
+    const messageDiv = document.getElementById('message');
+    messageDiv.innerHTML = '';
+
+    // 주사위 굴리기 버튼 초기화
+    const rollDiceButton = document.getElementById('roll-dice');
+    rollDiceButton.style.display = 'block';
+    rollDiceButton.style.pointerEvents = 'auto'; // 클릭 가능하게 설정
+    rollDiceButton.disabled = false;
+
+    // 재시작 버튼 숨기기
+    const restartButton = document.getElementById('restart-game');
+    restartButton.style.display = 'none';
+
+    // 보스 및 무기 이미지 숨기기
+    document.getElementById('boss-image').style.display = 'none';
+    document.getElementById('weapon-image').style.display = 'none';
+
+    // UI 업데이트
+    updatePlayerStatus();
+
+    // 초기 메시지 표시
+    displayMessage('게임이 재시작되었습니다!');
+});
+
+
+       
+
+        // 초기화
+        updatePlayerStatus();
+        // 게임 시작 클릭 이벤트 추가
+        document.getElementById('game-start').addEventListener('click', function () {
+    // 로그인 화면 숨기기
+        document.getElementById('login-screen').style.display = 'none';
+
+    // 게임 화면 표시
+        document.getElementById('game-screen').style.display = 'block';
+});
+
+    </script>
+</body>
+</html>
